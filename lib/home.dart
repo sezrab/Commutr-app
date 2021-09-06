@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:map_app/map_view.dart';
+import 'package:map_app/profile.dart';
 import 'package:map_app/theme_data.dart';
 
 class HomePage extends StatefulWidget {
@@ -42,21 +43,24 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CustomColours.darkBackground,
-      body: SizedBox.expand(
-        child: PageView(
-          controller: _pageController,
-          onPageChanged: (index) {
-            setState(() => _selectedIndex = index);
-          },
-          children: <Widget>[
-            Container(),
-            Container(child: _mapView),
-          ],
+      backgroundColor: CustomTheme.darkBackground,
+      body: SafeArea(
+        child: SizedBox.expand(
+          child: PageView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() => _selectedIndex = index);
+            },
+            children: <Widget>[
+              Profile(),
+              _mapView,
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: CustomColours.darkForeground,
+        backgroundColor: CustomTheme.darkForeground,
         showSelectedLabels: false,
         showUnselectedLabels: false,
         items: <BottomNavigationBarItem>[
@@ -70,8 +74,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: CustomColours.highlight,
-        unselectedItemColor: CustomColours.inactive,
+        selectedItemColor: CustomTheme.highlight,
+        unselectedItemColor: CustomTheme.inactive,
         onTap: _onItemTapped,
       ),
     );

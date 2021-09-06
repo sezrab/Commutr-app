@@ -1,92 +1,88 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_location/flutter_map_location.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:latlong2/latlong.dart';
 
 class MapView extends StatefulWidget {
-  const MapView({Key? key}) : super(key: key);
-
   @override
   _MapViewState createState() => _MapViewState();
 }
 
 class _MapViewState extends State<MapView> {
-  late MapController mapController;
+  late CenterOnLocationUpdate _centerOnLocationUpdate;
+  late StreamController<double> _centerCurrentLocationStreamController;
 
   @override
   void initState() {
     super.initState();
-    mapController = MapController();
+    _centerOnLocationUpdate = CenterOnLocationUpdate.always;
+    _centerCurrentLocationStreamController = StreamController<double>();
+  }
+
+  @override
+  void dispose() {
+    _centerCurrentLocationStreamController.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FlutterMap(
-      mapController: mapController,
-      options: MapOptions(
-        plugins: <MapPlugin>[
-          // USAGE NOTE 2: Add the plugin
-          LocationPlugin(),
-        ],
-      ),
-      layers: <LayerOptions>[
-        TileLayerOptions(
-            urlTemplate:
-                "https://api.mapbox.com/styles/v1/samuelezraberry/cksu4fbc13cgz18pfalg7dkkl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoic2FtdWVsZXpyYWJlcnJ5IiwiYSI6ImNrc3UzODd5eDFjanEydG1kZnZpNjYwZngifQ.kKLofNEMgAvb4zrsdWdMHw",
-            additionalOptions: {
-              'accessToken':
-                  'pk.eyJ1Ijoic2FtdWVsZXpyYWJlcnJ5IiwiYSI6ImNrc3UzODd5eDFjanEydG1kZnZpNjYwZngifQ.kKLofNEMgAvb4zrsdWdMHw',
-              'id': 'mapbox.mapbox-streets-v8',
-            }),
-      ],
-      nonRotatedLayers: <LayerOptions>[
-        // USAGE NOTE 3: Add the options for the plugin
-        LocationOptions(
-          locationButton(),
-          onLocationUpdate: (LatLngData? ld) {
-            print(
-                'Location updated: ${ld?.location} (accuracy: ${ld?.accuracy})');
-          },
-          onLocationRequested: (LatLngData? ld) {
-            if (ld == null) {
-              return;
-            }
-            mapController.move(ld.location, 16.0);
-          },
+    return Stack(
+      children: [
+        FlutterMap(
+          options: MapOptions(
+              center: LatLng(0, 0),
+              zoom: 15,
+              // Stop centering the location marker on the map if user interacted with the map.
+              onPositionChanged: (MapPosition position, bool hasGesture) {
+                if (hasGesture) {
+                  setState(() =>
+                      _centerOnLocationUpdate = CenterOnLocationUpdate.never);
+                }
+              }),
+          children: [
+            TileLayerWidget(
+              options: TileLayerOptions(
+                  urlTemplate:
+                      "https://api.mapbox.com/styles/v1/samuelezraberry/cksu4fbc13cgz18pfalg7dkkl/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoic2FtdWVsZXpyYWJlcnJ5IiwiYSI6ImNrc3UzODd5eDFjanEydG1kZnZpNjYwZngifQ.kKLofNEMgAvb4zrsdWdMHw",
+                  additionalOptions: {
+                    'accessToken':
+                        'pk.eyJ1Ijoic2FtdWVsZXpyYWJlcnJ5IiwiYSI6ImNrc3UzODd5eDFjanEydG1kZnZpNjYwZngifQ.kKLofNEMgAvb4zrsdWdMHw',
+                    'id': 'mapbox.mapbox-streets-v8',
+                  },
+                  minZoom: 3),
+            ),
+            LocationMarkerLayerWidget(
+              options: LocationMarkerLayerOptions(
+                  showHeadingSector: false, showAccuracyCircle: true),
+              plugin: LocationMarkerPlugin(
+                centerCurrentLocationStream:
+                    _centerCurrentLocationStreamController.stream,
+                centerOnLocationUpdate: _centerOnLocationUpdate,
+              ),
+            ),
+            // Positioned(
+            //   right: 20,
+            //   bottom: 20,
+            //   child: FloatingActionButton(
+            //     onPressed: () {
+            //       // Automatically center the location marker on the map when location updated until user interact with the map.
+            //       setState(() =>
+            //           _centerOnLocationUpdate = CenterOnLocationUpdate.always);
+            //       // Center the location marker on the map and zoom the map to level 18.
+            //       _centerCurrentLocationStreamController.add(18);
+            //     },
+            //     child: Icon(
+            //       Icons.my_location,
+            //       color: Colors.white,
+            //     ),
+            //   ),
+            // ),
+          ],
         ),
       ],
     );
-  }
-
-  LocationButtonBuilder locationButton() {
-    return (BuildContext context, ValueNotifier<LocationServiceStatus> status,
-        Function onPressed) {
-      return Align(
-        alignment: Alignment.bottomRight,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 16.0, right: 16.0),
-          child: FloatingActionButton(
-              child: ValueListenableBuilder<LocationServiceStatus>(
-                  valueListenable: status,
-                  builder: (BuildContext context, LocationServiceStatus value,
-                      Widget? child) {
-                    switch (value) {
-                      case LocationServiceStatus.disabled:
-                      case LocationServiceStatus.permissionDenied:
-                      case LocationServiceStatus.unsubscribed:
-                        return const Icon(
-                          Icons.location_disabled,
-                          color: Colors.white,
-                        );
-                      default:
-                        return const Icon(
-                          Icons.location_searching,
-                          color: Colors.white,
-                        );
-                    }
-                  }),
-              onPressed: () => onPressed()),
-        ),
-      );
-    };
   }
 }
