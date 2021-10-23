@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:map_app/map_view.dart';
-import 'package:map_app/profile.dart';
-import 'package:map_app/theme_data.dart';
+import 'package:map_app/views/map_view.dart';
+import 'package:map_app/pages/profile.dart';
+import 'package:map_app/utils/theme_data.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
