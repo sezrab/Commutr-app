@@ -5,7 +5,12 @@ import 'package:map_app/utils/dbManager.dart';
 import 'package:map_app/utils/theme_data.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => CartModel(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 Future<dynamic> startBackgroundLocation() async {
