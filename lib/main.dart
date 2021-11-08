@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:map_app/pages/home.dart';
 import 'package:background_location/background_location.dart';
-import 'package:map_app/utils/dbManager.dart';
-import 'package:map_app/utils/theme_data.dart';
+import 'package:map_app/providers/appDataProvider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => CartModel(),
-      child: const MyApp(),
+    ChangeNotifierProvider<AppDataProvider>(
+      create: (context) => AppDataProvider(),
+      child: Consumer<AppDataProvider>(
+        builder: (context, themeProvider, child) => MyApp(),
+      ),
     ),
+    // MyApp(),
   );
 }
 
@@ -36,20 +39,42 @@ class MyApp extends StatelessWidget {
     return FutureBuilder(
       future: bgLocation, // a previously-obtained Future<String> or null
       builder: (BuildContext context, AsyncSnapshot snapshot) {
+        Widget child;
         if (snapshot.hasData) {
-          return MaterialApp(
-            title: 'Commutr',
-            home: HomePage(),
-          );
+          child = HomePage();
         } else if (snapshot.hasError) {
-          return Center(child: Text("Something went wrong"));
+          child = Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      "error",
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              Text(snapshot.error.toString()),
+            ],
+          );
         } else {
-          return Center(
+          child = Center(
             child: CircularProgressIndicator(
               color: Colors.white,
             ),
           );
         }
+        return MaterialApp(
+          title: 'Commutr',
+          home: Scaffold(body: child),
+        );
       },
     );
   }
