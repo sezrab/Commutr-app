@@ -21,7 +21,7 @@ class AppDataProvider extends ChangeNotifier {
       join(dbPath, 'locations.db'),
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE locationPoints(id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT, lat DOUBLE NOT NULL, lon DOUBLE NOT NULL, frequency INT NOT NULL);)',
+          'CREATE TABLE locationPoints(id INTEGER PRIMARY KEY NOT NULL, lat DOUBLE NOT NULL, lon DOUBLE NOT NULL, frequency INT NOT NULL);)',
         );
       },
       version: 1,
