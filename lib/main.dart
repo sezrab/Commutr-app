@@ -16,16 +16,17 @@ void main() {
   );
 }
 
-Future<dynamic> startBackgroundLocation() async {
+Future<dynamic> startBackgroundLocation(BuildContext context) async {
   await BackgroundLocation.setAndroidNotification(
     title: 'Background service is running',
     message: 'Background location in progress',
     icon: '@mipmap/ic_launcher',
   );
-  await BackgroundLocation.startLocationService();
-  BackgroundLocation.getLocationUpdates((location) {
-    print(location.latitude);
-    print(location.longitude);
+  await BackgroundLocation.startLocationService(distanceFilter: 5.0);
+  BackgroundLocation.getLocationUpdates((location) async {
+    print("Location Change");
+    await Provider.of<AppDataProvider>(context, listen: false)
+        .addLocationPoint(location.latitude!, location.longitude!);
   });
   print("Finished");
   return true;
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    Future<dynamic> bgLocation = startBackgroundLocation();
+    Future<dynamic> bgLocation = startBackgroundLocation(context);
     return FutureBuilder(
       future: bgLocation, // a previously-obtained Future<String> or null
       builder: (BuildContext context, AsyncSnapshot snapshot) {

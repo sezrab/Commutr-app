@@ -16,7 +16,7 @@ class AppDataProvider extends ChangeNotifier {
   Future<Database> openLocationDB() async {
     WidgetsFlutterBinding.ensureInitialized();
     String dbPath = await getDatabasesPath();
-
+    print('db location : ' + join(dbPath, 'locations.db'));
     return openDatabase(
       join(dbPath, 'locations.db'),
       onCreate: (db, version) {
@@ -29,6 +29,7 @@ class AppDataProvider extends ChangeNotifier {
   }
 
   Future<void> addLocationPoint(double lat, double lon) async {
+    print("Adding " + lat.toString() + ", " + lon.toString());
     List<LocationPoint> points = await locationPoints();
 
     List<LocationPoint> nearbyPoints = [];
@@ -36,6 +37,7 @@ class AppDataProvider extends ChangeNotifier {
     for (var point in points) {
       double distance =
           LocationFunctions.haversine(lat, lon, point.lat, point.lon);
+      print("distance was " + distance.toString());
       if (distance <= 20) {
         nearbyPoints.add(point);
       }
@@ -45,7 +47,7 @@ class AppDataProvider extends ChangeNotifier {
     if (nearbyPoints.isEmpty) {
       // insert new
       await db.insert(
-        'locations',
+        'locationPoints',
         {
           'lat': lat,
           'lon': lon,
@@ -70,7 +72,8 @@ class AppDataProvider extends ChangeNotifier {
     final db = await openLocationDB();
 
     // Query the table for all The Dogs.
-    final List<Map<String, dynamic>> maps = await db.query('locationPoints');
+    final List<Map<String, dynamic>> maps =
+        await db.query('locationPoints ORDER BY frequency DESC');
 
     // Convert the List<Map<String, dynamic> into a List<Dog>.
     return List.generate(maps.length, (i) {
