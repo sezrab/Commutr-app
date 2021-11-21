@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:map_app/models/locationPoint.dart';
+import 'package:map_app/providers/appDataProvider.dart';
+import 'package:provider/provider.dart';
 
 class MapView extends StatefulWidget {
   @override
@@ -13,6 +16,8 @@ class MapView extends StatefulWidget {
 class _MapViewState extends State<MapView> {
   late CenterOnLocationUpdate _centerOnLocationUpdate;
   late StreamController<double> _centerCurrentLocationStreamController;
+
+  List<LocationPoint> points = [];
 
   @override
   void initState() {
@@ -32,6 +37,23 @@ class _MapViewState extends State<MapView> {
     return Stack(
       children: [
         FlutterMap(
+          layers: [
+            MarkerLayerOptions(
+              markers: Provider.of<AppDataProvider>(context, listen: true)
+                  .points
+                  .map((pt) => Marker(
+                        point: LatLng(pt.lat, pt.lon),
+                        builder: (context) => Container(
+                          child: Icon(
+                            Icons.circle,
+                            size: 3,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ],
           options: MapOptions(
               center: LatLng(0, 0),
               zoom: 15,
