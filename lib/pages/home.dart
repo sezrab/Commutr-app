@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:map_app/pages/overview.dart';
 import 'package:map_app/views/map_view.dart';
-import 'package:map_app/pages/profile.dart';
+import 'package:map_app/pages/technical.dart';
 import 'package:map_app/utils/theme_data.dart';
 
 class HomePage extends StatefulWidget {
@@ -43,7 +44,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CustomTheme.darkBackground,
+      backgroundColor: CustomTheme.background,
       body: SafeArea(
         child: SizedBox.expand(
           child: PageView(
@@ -53,20 +54,25 @@ class _HomePageState extends State<HomePage> {
               setState(() => _selectedIndex = index);
             },
             children: <Widget>[
-              Profile(),
+              Overview(),
+              Technical(),
               _mapView,
             ],
           ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: CustomTheme.darkForeground,
+        backgroundColor: CustomTheme.secondary,
         showSelectedLabels: false,
         showUnselectedLabels: false,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.person_rounded),
-            label: "Stats",
+            label: "Overview",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "Technical",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.map_rounded),

@@ -22,13 +22,11 @@ Future<dynamic> startBackgroundLocation(BuildContext context) async {
     message: 'Background location in progress',
     icon: '@mipmap/ic_launcher',
   );
-  await BackgroundLocation.startLocationService(distanceFilter: 10);
+  await BackgroundLocation.startLocationService();
   BackgroundLocation.getLocationUpdates((location) async {
-    print("Location Change");
     await Provider.of<AppDataProvider>(context, listen: false)
-        .addLocationPoint(location.latitude!, location.longitude!);
+        .updateLocation(location.latitude!, location.longitude!);
   });
-  print("Finished");
   return true;
 }
 

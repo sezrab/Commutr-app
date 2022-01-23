@@ -1,6 +1,6 @@
 class LocationPoint {
   final int id;
-  final int frequency;
+  int frequency;
   final double lat;
   final double lon;
   LocationPoint({
@@ -9,4 +9,7 @@ class LocationPoint {
     required this.lat,
     required this.lon,
   });
+  String coords() {
+    return lat.toString() + "," + lon.toString();
+  }
 }

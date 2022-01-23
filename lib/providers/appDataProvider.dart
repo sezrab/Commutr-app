@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:background_location/background_location.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_app/models/locationPoint.dart';
 import 'package:map_app/utils/haversine.dart';
@@ -12,22 +13,33 @@ class AppDataProvider extends ChangeNotifier {
   double lastLat = 0;
   double lastLon = 0;
 
-  List<LocationPoint> points = [];
-  bool markerToggle = false;
+  double currentLat = 0;
+  double currentLon = 0;
 
-  void toggleMarkers() async {
-    if (markerToggle == false) {
-      points = await getLocationPoints();
-      markerToggle = points.isNotEmpty;
-    } else {
-      points = [];
-      markerToggle = false;
-    }
+  List<LocationPoint> markers = [];
+
+  List<dynamic> route = [];
+
+  void setMarkers(List<LocationPoint> points) async {
+    markers = points;
+    notifyListeners();
+  }
+
+  void setRoute(List<dynamic> r) {
+    route = r;
+    notifyListeners();
+  }
+
+  void unsetMarkers() {
+    markers = [];
     notifyListeners();
   }
 
   Future<bool> deleteLocationDB() async {
     File dbFile = File(join(await getDatabasesPath(), 'locations.db'));
+    lastLat = 0;
+    lastLon = 0;
+
     if (!dbFile.existsSync()) {
       return false;
     }
@@ -57,8 +69,18 @@ class AppDataProvider extends ChangeNotifier {
     );
   }
 
+  Future<void> updateLocation(double lat, double lon) async {
+    currentLat = lat;
+    currentLon = lon;
+    notifyListeners();
+    await addLocationPoint(lat, lon);
+  }
+
   Future<void> addLocationPoint(double lat, double lon) async {
-    if ([lat, lon] != [lastLat, lastLon]) {
+    double distFromLast =
+        HaversineFormula.fromDegrees(lat, lon, lastLat, lastLon).distance();
+    if (!ListEquality().equals([lat, lon], [lastLat, lastLon]) &
+        (distFromLast > 0.5)) {
       lastLat = lat;
       lastLon = lon;
 
@@ -103,6 +125,55 @@ class AppDataProvider extends ChangeNotifier {
     }
   }
 
+  List<LocationPoint> decluster(List<LocationPoint> li) {
+    List<LocationPoint> declustered = List.from(li);
+
+    for (var point1 in li) {
+      if (declustered.contains(point1)) {
+        for (var point2 in li) {
+          if (declustered.contains(point1) & (point2 != point1)) {
+            if (HaversineFormula.fromDegrees(
+                        point1.lat, point1.lon, point2.lat, point2.lon)
+                    .distance() <
+                60) {
+              if (declustered.contains(point2)) {
+                declustered.remove(point2);
+                point1.frequency += point2.frequency;
+              }
+            }
+          }
+        }
+      }
+    }
+    return declustered;
+  }
+
+  Future<List<LocationPoint>> getMostVisitedPoints({int n = 5}) async {
+    // To qualify, a point must have > 60 frequency ticks, and must be above the 70th percentile of all the frequencies
+    List<LocationPoint> locations = await getLocationPoints();
+
+    var Q1 = (0.25 * locations.length).toInt();
+
+    // int(.7*locations.length) : locations.length
+    List<LocationPoint> inQ1 = locations.sublist(0, Q1);
+
+    List<LocationPoint> mostVisited = [];
+
+    for (var locationPoint in inQ1) {
+      if (locationPoint.frequency > 30) {
+        mostVisited.add(locationPoint);
+      }
+    }
+
+    var mostVisitedDeclustered = decluster(mostVisited);
+
+    if (mostVisitedDeclustered.length < 2) {
+      return [];
+    } else {
+      return mostVisitedDeclustered.sublist(0, n - 1);
+    }
+  }
+
   Future<List<LocationPoint>> getLocationPoints() async {
     // Get a reference to the database.
     final db = await openLocationDB();
@@ -111,13 +182,13 @@ class AppDataProvider extends ChangeNotifier {
     final List<Map<String, dynamic>> maps =
         await db.query('locationPoints ORDER BY frequency DESC');
     // Convert the List<Map<String, dynamic> into a List<Dog>.
-    return List.generate(maps.length, (i) {
+    return decluster(List.generate(maps.length, (i) {
       return LocationPoint(
         id: maps[i]['id'],
         lat: maps[i]['lat'],
         lon: maps[i]['lon'],
         frequency: maps[i]['frequency'],
       );
-    });
+    }));
   }
 }
