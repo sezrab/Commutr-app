@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:map_app/models/locationPoint.dart';
 import 'package:map_app/providers/appDataProvider.dart';
@@ -67,11 +69,17 @@ class _OverviewState extends State<Overview> {
                   TextButton(
                     child: Text("Get my routes"),
                     onPressed: () async {
-                      Provider.of<AppDataProvider>(context, listen: false)
-                          .setMarkers(await Provider.of<AppDataProvider>(
-                                  context,
-                                  listen: false)
-                              .getMostVisitedPoints());
+                      var pts = await Provider.of<AppDataProvider>(context,
+                              listen: false)
+                          .getMostVisitedPoints();
+                      if (pts.length == 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                "You don't have enough data to find any routes. Keep commuting!")));
+                      } else {
+                        Provider.of<AppDataProvider>(context, listen: false)
+                            .setMarkers(pts);
+                      }
                     },
                   ),
                   buildRouteButtons(points),
@@ -103,6 +111,8 @@ class _OverviewState extends State<Overview> {
 
   Widget buildRouteButtons(List<LocationPoint> points) {
     List<Widget> li = [];
+
+    points = points.sublist(0, min(5, points.length));
     for (var i = 0; i < points.length; i++) {
       li.add(Padding(
         padding: const EdgeInsets.all(2.0),

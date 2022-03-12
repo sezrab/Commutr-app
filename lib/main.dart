@@ -42,7 +42,8 @@ class MyApp extends StatelessWidget {
         if (snapshot.hasData) {
           child = HomePage();
         } else if (snapshot.hasError) {
-          child = Column(
+          child = Scaffold(
+              body: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Row(
@@ -62,17 +63,19 @@ class MyApp extends StatelessWidget {
               ),
               Text(snapshot.error.toString()),
             ],
-          );
+          ));
         } else {
-          child = Center(
-            child: CircularProgressIndicator(
-              color: Colors.white,
+          child = Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+              ),
             ),
           );
         }
         return MaterialApp(
           title: 'Commutr',
-          home: Scaffold(body: child),
+          home: child,
         );
       },
     );

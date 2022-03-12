@@ -74,7 +74,7 @@ class _TechnicalState extends State<Technical> {
                       child: Center(
                         child: Text(
                           points.isEmpty
-                              ? "No data"
+                              ? "Info: Load some data first"
                               : "Your most visited point has frequency " +
                                   points[0].frequency.toString(),
                           style: CustomTheme.regular,
@@ -93,7 +93,7 @@ class _TechnicalState extends State<Technical> {
                       child: Center(
                         child: Text(
                           points.isEmpty
-                              ? "No data"
+                              ? "Info: Load some data first"
                               : "You have " +
                                   points.length.toString() +
                                   " points",
@@ -105,33 +105,40 @@ class _TechnicalState extends State<Technical> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TextButton(
-                        onPressed: () async {
-                          if (allMarkersToggled) {
-                            Provider.of<AppDataProvider>(context, listen: false)
-                                .unsetMarkers();
-                          } else {
-                            Provider.of<AppDataProvider>(context, listen: false)
-                                .setMarkers(await Provider.of<AppDataProvider>(
-                                        context,
-                                        listen: false)
-                                    .getLocationPoints());
-                          }
-                          allMarkersToggled = !allMarkersToggled;
+                      Visibility(
+                        visible: true,
+                        child: TextButton(
+                          onPressed: () async {
+                            if (allMarkersToggled) {
+                              Provider.of<AppDataProvider>(context,
+                                      listen: false)
+                                  .unsetMarkers();
+                            } else {
+                              Provider.of<AppDataProvider>(context,
+                                      listen: false)
+                                  .setMarkers(
+                                      await Provider.of<AppDataProvider>(
+                                              context,
+                                              listen: false)
+                                          .getLocationPoints());
+                            }
+                            allMarkersToggled = !allMarkersToggled;
 
-                          setState(() {});
-                        },
-                        child: Text(
-                            allMarkersToggled ? "Unload data" : "All Points",
-                            style: CustomTheme.regular),
-                        style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16.0),
-                          )),
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              CustomTheme.accent),
+                            setState(() {});
+                          },
+                          child: Text(
+                              allMarkersToggled
+                                  ? "Unload data"
+                                  : "All Data (debug)",
+                              style: CustomTheme.regular),
+                          style: ButtonStyle(
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            )),
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Colors.grey.shade800),
+                          ),
                         ),
                       ),
                       Spacer(),
@@ -152,7 +159,9 @@ class _TechnicalState extends State<Technical> {
                           setState(() {});
                         },
                         child: Text(
-                            allMarkersToggled ? "Unload data" : "Most visited",
+                            allMarkersToggled
+                                ? "Unload data"
+                                : "Load most visited points",
                             style: CustomTheme.regular),
                         style: ButtonStyle(
                           shape:
@@ -161,10 +170,13 @@ class _TechnicalState extends State<Technical> {
                             borderRadius: BorderRadius.circular(16.0),
                           )),
                           backgroundColor: MaterialStateProperty.all<Color>(
-                              CustomTheme.accent),
+                              Colors.green.shade900),
                         ),
                       ),
                     ],
+                  ),
+                  SizedBox(
+                    height: 100,
                   ),
                   TextButton(
                     onPressed: () async {
@@ -188,7 +200,7 @@ class _TechnicalState extends State<Technical> {
                         borderRadius: BorderRadius.circular(16.0),
                       )),
                       backgroundColor:
-                          MaterialStateProperty.all<Color>(CustomTheme.accent),
+                          MaterialStateProperty.all<Color>(Colors.red.shade800),
                     ),
                   ),
                 ],

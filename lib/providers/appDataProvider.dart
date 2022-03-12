@@ -166,6 +166,7 @@ class AppDataProvider extends ChangeNotifier {
     }
 
     var mostVisitedDeclustered = decluster(mostVisited);
+    print(mostVisitedDeclustered.length);
 
     if (mostVisitedDeclustered.length < 2) {
       return [];
