@@ -94,6 +94,7 @@ class _OverviewState extends State<Overview> {
   }
 
   Widget buildMakeRouteButton(LocationPoint? a, LocationPoint? b) {
+    // function to build and show the make route button
     return Visibility(
       child: TextButton(
           onPressed: () async {
@@ -110,6 +111,7 @@ class _OverviewState extends State<Overview> {
   }
 
   Widget buildRouteButtons(List<LocationPoint> points) {
+    // button to build a maximum of five "route buttons". these are the buttons that allow you to set a start and end point between your most visited locations
     List<Widget> li = [];
 
     points = points.sublist(0, min(5, points.length));
@@ -118,6 +120,7 @@ class _OverviewState extends State<Overview> {
         padding: const EdgeInsets.all(2.0),
         child: TextButton(
             onPressed: () {
+              // the below is to ensure only two are selected, and that if a third is selected, the first selected button is deselected.
               if (points[i] == selected1) {
                 selected1 = null;
               } else if (points[i] == selected2) {

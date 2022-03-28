@@ -10,32 +10,40 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class AppDataProvider extends ChangeNotifier {
+  // previous updated position
   double lastLat = 0;
   double lastLon = 0;
 
+  // most up to date position
   double currentLat = 0;
   double currentLon = 0;
 
+  // the list of markers to plot
   List<LocationPoint> markers = [];
 
+  // the list of coordinates on a polyline
   List<dynamic> route = [];
 
   void setMarkers(List<LocationPoint> points) async {
+    // set the list of markers to plot and notify listeners
     markers = points;
     notifyListeners();
   }
 
   void setRoute(List<dynamic> r) {
+    // set the route (polyline coordinates) list and notify listners
     route = r;
     notifyListeners();
   }
 
   void unsetMarkers() {
+    // unset the markers list and notify listeners
     markers = [];
     notifyListeners();
   }
 
   Future<bool> deleteLocationDB() async {
+    // delete the location database file and notify listeners
     File dbFile = File(join(await getDatabasesPath(), 'locations.db'));
     lastLat = 0;
     lastLon = 0;
@@ -55,9 +63,12 @@ class AppDataProvider extends ChangeNotifier {
   }
 
   Future<Database> openLocationDB() async {
+    // open the location database
+    // if there is not an existing database, create it and the relevant tables
+
     WidgetsFlutterBinding.ensureInitialized();
     String dbPath = await getDatabasesPath();
-    // print('db location : ' + join(dbPath, 'locations.db'));
+
     return openDatabase(
       join(dbPath, 'locations.db'),
       onCreate: (db, version) {
@@ -126,6 +137,8 @@ class AppDataProvider extends ChangeNotifier {
   }
 
   List<LocationPoint> decluster(List<LocationPoint> li) {
+    double threshDistance = 50;
+
     List<LocationPoint> declustered = List.from(li);
 
     for (var point1 in li) {
@@ -135,7 +148,7 @@ class AppDataProvider extends ChangeNotifier {
             if (HaversineFormula.fromDegrees(
                         point1.lat, point1.lon, point2.lat, point2.lon)
                     .distance() <
-                60) {
+                threshDistance) {
               if (declustered.contains(point2)) {
                 declustered.remove(point2);
                 point1.frequency += point2.frequency;
@@ -182,7 +195,6 @@ class AppDataProvider extends ChangeNotifier {
     // Query the table for all The Dogs.
     final List<Map<String, dynamic>> maps =
         await db.query('locationPoints ORDER BY frequency DESC');
-    // Convert the List<Map<String, dynamic> into a List<Dog>.
     return decluster(List.generate(maps.length, (i) {
       return LocationPoint(
         id: maps[i]['id'],

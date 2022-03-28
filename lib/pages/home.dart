@@ -13,15 +13,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex =
+      0; // for selection of the three panels of the bottom nav menu bar
 
-  List<Widget> views = [];
-
-  late PageController _pageController;
-  late MapView _mapView;
+  late PageController _pageController; // controls swiping between pages
+  late MapView _mapView; // the map ui
 
   @override
   void initState() {
+    // init page and map
     super.initState();
     _pageController = PageController();
     _mapView = MapView();
@@ -34,6 +34,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onItemTapped(int index) {
+    // when a navigation item is tapped, do swipe animation to that page
     setState(() {
       _selectedIndex = index;
       _pageController.animateToPage(index,
@@ -43,6 +44,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // build the home screen
     return Scaffold(
       backgroundColor: CustomTheme.background,
       body: SafeArea(
@@ -51,7 +53,8 @@ class _HomePageState extends State<HomePage> {
             physics: NeverScrollableScrollPhysics(),
             controller: _pageController,
             onPageChanged: (index) {
-              setState(() => _selectedIndex = index);
+              setState(() => _selectedIndex =
+                  index); // refresh the state when a page is changed
             },
             children: <Widget>[
               Overview(),
@@ -62,6 +65,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        // build the nav bar
         backgroundColor: CustomTheme.secondary,
         showSelectedLabels: false,
         showUnselectedLabels: false,

@@ -109,10 +109,12 @@ class _TechnicalState extends State<Technical> {
                         visible: true,
                         child: TextButton(
                           onPressed: () async {
+                            // on pressing the load data card
                             if (allMarkersToggled) {
                               Provider.of<AppDataProvider>(context,
                                       listen: false)
                                   .unsetMarkers();
+                              // if "show all markers" is already toggled, hide all markers
                             } else {
                               Provider.of<AppDataProvider>(context,
                                       listen: false)
@@ -121,10 +123,11 @@ class _TechnicalState extends State<Technical> {
                                               context,
                                               listen: false)
                                           .getLocationPoints());
+                              // else show all markers
                             }
                             allMarkersToggled = !allMarkersToggled;
-
-                            setState(() {});
+                            // change the toggle after pressing
+                            setState(() {}); // refresh the state
                           },
                           child: Text(
                               allMarkersToggled
@@ -144,6 +147,7 @@ class _TechnicalState extends State<Technical> {
                       Spacer(),
                       TextButton(
                         onPressed: () async {
+                          // same as above, apart from it only loads the most visited points as markers
                           if (allMarkersToggled) {
                             Provider.of<AppDataProvider>(context, listen: false)
                                 .unsetMarkers();
@@ -189,6 +193,7 @@ class _TechnicalState extends State<Technical> {
                           content: Text(success
                               ? "Deleted database"
                               : "Couldn't delete database")));
+                      // delete the db
                     },
                     child: Text(
                       "Delete database",
