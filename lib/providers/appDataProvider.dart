@@ -1,10 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:background_location/background_location.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:map_app/models/locationPoint.dart';
 import 'package:map_app/utils/haversine.dart';
 import 'package:sqflite/sqflite.dart';
@@ -12,6 +10,7 @@ import 'package:path/path.dart';
 
 class AppDataProvider extends ChangeNotifier {
   String _dbFileName = 'locations.db';
+  // name of the location storage database
 
   // previous updated position
   double lastLat = 0;
