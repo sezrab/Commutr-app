@@ -200,18 +200,22 @@ class AppDataProvider extends ChangeNotifier {
   }
 
   Future<List<LocationPoint>> getMostVisitedPoints({int n = 5}) async {
-    // To qualify, a point must have > 60 frequency ticks, and must be above the 70th percentile of all the frequencies
+    // To qualify, a point must have > 30 frequency ticks, and must be in the top quartile of all the frequencies
+    var threshFreq = 30;
+
     List<LocationPoint> locations = await getLocationPoints();
+    // get all location points
 
     var Q1 = (0.25 * locations.length).toInt();
+    // calculate Q1
 
-    // int(.7*locations.length) : locations.length
     List<LocationPoint> inQ1 = locations.sublist(0, Q1);
+    // get the items in the list of Q1
 
     List<LocationPoint> mostVisited = [];
-
     for (var locationPoint in inQ1) {
-      if (locationPoint.frequency > 30) {
+      // if a location point is in the top quartile and has a frequency above the threshhold
+      if (locationPoint.frequency > threshFreq) {
         mostVisited.add(locationPoint);
         // add it to the most visited list
       }
